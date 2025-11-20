@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Hub - Your Essential Links</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font and scrollbar styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Dark background */
+            color: #c9d1d9; /* Light text */
+            scroll-behavior: smooth;
+        }
+        /* Custom scrollbar for better visual integration */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #30363d;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: #161b22;
+        }
+        /* Style for the link cards */
+        .link-card {
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, opacity 0.3s;
+            background-color: #161b22; /* Darker card background */
+            display: flex; 
+            align-items: flex-start;
+        }
+        .link-card.hidden {
+            display: none; 
+            opacity: 0;
+            pointer-events: none;
+        }
+        .link-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(10, 10, 10, 0.7);
+            border-color: #38bdf8; /* Highlight border on hover */
+        }
+        .category-title {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .search-container {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        /* Custom Styles for the Sidebar */
+        .sidebar {
+            /* Position on the right side */
+            right: 0;
+            left: auto;
+            transform: translateX(100%); /* Start hidden off-screen to the right */
+            
+            width: 80%; /* Mobile width */
+            max-width: 300px; /* Desktop width limit */
+            transition: transform 0.3s ease-in-out;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5); /* Shadow on the left */
+        }
+        /* When open, move to 0 */
+        .sidebar:not(.translate-x-full) {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="p-0 sm:p-8">
+
+    <!-- Mobile Menu / Sidebar (Off-Canvas Navigation) -->
+    <nav id="sidebar" class="sidebar fixed top-0 h-full bg-gray-900 z-50 overflow-y-auto p-6 border-l border-gray-700/50">
+        <h3 class="text-3xl font-bold text-sky-400 mb-8 border-b border-gray-700 pb-4">
+            Navigation
+        </h3>
+        <ul class="space-y-4">
+            <li>
+                <button onclick="switchView('essential-sites'); toggleMenu(false);" 
+                        class="nav-link w-full text-left text-xl p-3 rounded-lg text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition duration-150"
+                        data-view="essential-sites">
+                    Essential Sites
+                </button>
+            </li>
+            <li>
+                <button onclick="switchView('everyday-sites'); toggleMenu(false);" 
+                        class="nav-link w-full text-left text-xl p-3 rounded-lg text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition duration-150"
+                        data-view="everyday-sites">
+                    Everyday Sites
+                </button>
+            </li>
+            <li>
+                <button onclick="switchView('chrome-extensions'); toggleMenu(false);" 
+                        class="nav-link w-full text-left text-xl p-3 rounded-lg text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition duration-150"
+                        data-view="chrome-extensions">
+                    Chrome Extensions
+                </button>
+            </li>
+            <li>
+                <button onclick="switchView('tech-resources'); toggleMenu(false);" 
+                        class="nav-link w-full text-left text-xl p-3 rounded-lg text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition duration-150"
+                        data-view="tech-resources">
+                    Tech Resources
+                </button>
+            </li>
+        </ul>
+        <button onclick="toggleMenu(false)" class="absolute top-4 left-4 text-gray-400 hover:text-white p-2 rounded-full transition">
+            <!-- Close Icon (X) -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </nav>
+
+    <!-- Overlay for when menu is open (for better UX) -->
+    <div id="overlay" onclick="toggleMenu(false)" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
+
+    <!-- Main Application Container -->
+    <div id="app-container" class="min-h-screen p-4 sm:p-0">
+
+        <!-- Header & Title -->
+        <header class="text-center mb-6 py-4 px-4 sm:p-8 bg-gray-800/70 backdrop-blur-md rounded-xl shadow-2xl border border-gray-700 flex items-center justify-between sm:justify-center relative">
+            
+            <!-- Hamburger Menu Button - Positioned in the top right of the header -->
+            <button onclick="toggleMenu(true)" class="text-white p-2 rounded-lg hover:bg-gray-700 transition absolute right-4 top-1/2 transform -translate-y-1/2 z-30">
+                <!-- Hamburger Icon (3 lines) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+
+            <!-- Title Block -->
+            <div>
+                <h1 class="text-3xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-indigo-500">
+                    The Essential Resource Hub
+                </h1>
+                <p class="text-sm sm:text-xl mt-2 text-gray-400 font-light">
+                    Your centralized access to useful websites, cleanly organized.
+                </p>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="max-w-7xl mx-auto">
+            
+            <!-- Search Bar Container (Sticky at the top, only visible in Essential Sites view) -->
+            <div id="search-section" class="search-container max-w-4xl mx-auto mb-10 p-4 bg-gray-900/90 backdrop-blur-lg rounded-xl shadow-2xl border border-gray-700">
+                <div class="relative">
+                    <!-- Search Icon (Magnifying Glass) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="searchInput" oninput="filterLinks()" placeholder="Search websites by name or description..." class="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-150" />
+                </div>
+            </div>
+
+            <!-- VIEW 1: ESSENTIAL SITES (Original Link Directory) -->
+            <div id="essential-sites" class="view-section">
+                <div id="content-grid" class="space-y-16">
+                    <!-- Link content will be injected here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- VIEW 2: EVERYDAY SITES (New) -->
+            <div id="everyday-sites" class="view-section hidden">
+                <div id="everyday-content-grid" class="space-y-16">
+                    <!-- Everyday links will be injected here by JavaScript in renderLinks function -->
+                </div>
+            </div>
+
+            <!-- VIEW 3: CHROME EXTENSIONS (Placeholder) -->
+            <div id="chrome-extensions" class="view-section hidden">
+                <div class="p-8 bg-gray-900/40 rounded-2xl border border-gray-800">
+                    <h2 class="text-3xl font-bold text-yellow-400 mb-4">Chrome Extensions Directory</h2>
+                    <p class="text-lg text-gray-400">This section is currently under development. Here you will find curated lists of useful Chrome extensions for productivity, privacy, and development.</p>
+                    <ul class="list-disc list-inside text-gray-500 mt-4 ml-4 space-y-2">
+                        <li>Placeholder for Extension Category 1</li>
+                        <li>Placeholder for Extension Category 2</li>
+                        <li>Placeholder for Extension Category 3</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- VIEW 4: TECH RESOURCES (Placeholder) -->
+            <div id="tech-resources" class="view-section hidden">
+                <div class="p-8 bg-gray-900/40 rounded-2xl border border-gray-800">
+                    <h2 class="text-3xl font-bold text-purple-400 mb-4">Tech & Developer Resources</h2>
+                    <p class="text-lg text-gray-400">This area will be dedicated to links and tutorials for coding, development tools, cloud computing, and emerging technology trends.</p>
+                    <ul class="list-disc list-inside text-gray-500 mt-4 ml-4 space-y-2">
+                        <li>Placeholder for Programming Languages</li>
+                        <li>Placeholder for Cloud Documentation</li>
+                        <li>Placeholder for Open Source Projects</li>
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JavaScript for Data Handling, Rendering, Search, and Navigation -->
+    <script>
+        // --- DATA ---
+        // Define the aggregated and categorized links with descriptions.
+
+        // Shared Links for Duplication
+        const sharedEverydayLinks = [
+            { title: "Wormhole - File Sharing", url: "https://wormhole.app/", description: "A simple, fast, and secure way to share files of any size with a link that expires after a set time or number of views." },
+            { title: "Startpage - Privacy Search", url: "https://www.startpage.com/sp/search", description: "A private search engine that uses Google results but strips all identifying trackers and personal data." },
+            { title: "Map This - Interactive Maps", url: "https://www.map-this.com/", description: "A general-purpose interactive map tool offering directions, custom markers, and location sharing features." },
+            { title: "Logseq - Knowledge Base", url: "https://logseq.com/", description: "A privacy-first, open-source knowledge base and outliner that lets you manage your notes, tasks, and knowledge graph." },
+            { title: "SerpAPI - Grammar Check", url: "https://serpapi.com/google-grammar-check", description: "A tool to access Google's grammar check feature, useful for quick proofreading and text correction." },
+            { title: "Cleanup.Picture - Image Cleanup", url: "https://cleanup.picture/", description: "A quick and easy tool that uses AI to remove unwanted objects, people, or text from photos seamlessly." },
+            { title: "Wifi Map", url: "https://www.wifimap.io/", description: "A community-driven map to find free Wi-Fi hotspots and passwords around the world." },
+            { title: "Fake Name Generator", url: "https://www.fakenamegenerator.com/", description: "Generates realistic, random details for testing, development, and privacy purposes." },
+            { title: "GasBuddy - Fuel Prices", url: "https://www.gasbuddy.com/", description: "Find the cheapest gas prices near you, reported by users, helping you save money on every fill-up." },
+            { title: "Side Hustle Stack", url: "https://sidehustlestack.co/", description: "A database of vetted platforms and resources to help you find and start profitable side hustles." },
+        ];
+
+
+        const categorizedLinks = {
+            // New links are added here AND in their most relevant category below
+            "Everyday Sites": {
+                id: "everyday-sites-category",
+                color: "text-green-300",
+                links: [
+                    { title: "Google Search", url: "https://www.google.com/", description: "The most popular search engine for finding information, images, and services quickly." },
+                    { title: "Wikipedia", url: "https://www.wikipedia.org/", description: "A free, collaborative, and multilingual encyclopedia that provides comprehensive knowledge on nearly every topic." },
+                    { title: "YouTube", url: "https://www.youtube.com/", description: "The world's largest video sharing platform for education, entertainment, and news." },
+                    { title: "AccuWeather", url: "https://www.accuweather.com/", description: "Provides hourly, daily, and 15-day weather forecasts, as well as severe weather alerts." },
+                    { title: "BBC News", url: "https://www.bbc.com/news", description: "Global breaking news and analysis from one of the world's most trusted public broadcasters." },
+                    { title: "Google Maps", url: "https://maps.google.com/", description: "Navigation tool for finding directions, local businesses, and satellite imagery worldwide." },
+                    ...sharedEverydayLinks // Include all shared links here
+                ]
+            },
+            "Gaming & Entertainment (Unblocked)": {
+                id: "gaming",
+                color: "text-indigo-300",
+                links: [
+                    { title: "Race Survival", url: "https://survival-race.io/", description: "A high-speed, competitive racing game where skill and reflexes are key to surviving the track and outlasting opponents." },
+                    { title: "Poly Track", url: "https://sites.google.com/view/poly-track/poly-track", description: "A simple yet addictive 3D track racing game, popular for being unblocked and easy to pick up and play in short bursts." },
+                    { title: "Cookie Clicker", url: "https://mrbuilder1961.github.io/", description: "An incremental idle game where you bake cookies to buy assets that help you bake more cookies." },
+                    { title: "Geometry Dash Lite", url: "https://sites.google.com/view/drive-u-7-home/geometry-dash-lite", description: "A rhythm-based platformer game that challenges your timing and precision across various challenging levels." },
+                    { title: "Slope", url: "https://windowslover1234.github.io/games/slope/", description: "Navigate a fast-paced 3D slope, avoiding obstacles and trying to achieve the highest possible score." },
+                    { title: "Hole.io", url: "https://sites.google.com/view/drive-u-7-home/hole-io", description: "Control a black hole and consume everything in your path to grow larger and eventually swallow other players." },
+                    { title: "Food Stars", url: "https://foodstars.io/", description: "A multiplayer casual game where you collect items and battle other players in a food-themed arena." },
+                    { title: "Nitro Type - Typing Race", url: "https://www.nitrotype.com/", description: "A competitive multiplayer typing game where speed and accuracy determine whether you win the race." },
+                    { title: "Idle Breakout", url: "https://idle-breakout.neocities.org/", description: "An incremental idle game based on the classic Breakout format, where you passively destroy blocks to upgrade your balls." },
+                    { title: "Bitlife Simulator", url: "https://bitlife76.github.io/", description: "A text-based life simulator where you make choices for your character from birth until death, influencing their career, relationships, and happiness." },
+                    { title: "Run 3", url: "https://lekug.github.io/tn6pS9dCf37xAhkJv/", description: "An endless runner game in space where you navigate a tunnel, flipping gravity to avoid falling into the void." },
+                    { title: "Clicker Heroes Unblocked", url: "https://www.yoosfuhl.com/game/clickerheroes/index.html", description: "An engaging idle game where you click to kill monsters, hiring heroes to automate the process as you progress through zones." },
+                    { title: "Retro Bowl 26", url: "https://retrobowl26.github.io/", description: "A retro-style American football management and playing simulator, focusing on strategy and simple gameplay." },
+                    { title: "Drift Boss", url: "https://drift-boss.gitlab.io/", description: "A minimalist racing game focused purely on mastering the art of the perfect drift around endless cornering tracks." },
+                    { title: "Edge Surf Game (Microsoft)", url: "https://www.microsoft.com/en-us/edge/surf?form=MA13E3", description: "Microsoft Edge's hidden endless surfing game, where you navigate waves and obstacles to maximize distance." },
+                    { title: "Yohoho - Battle Royale", url: "https://purepro4573.github.io/yohoho/", description: "A pirate-themed battle royale game where you collect gold, attack enemies, and try to be the last pirate standing." },
+                    { title: "Smash Karts", url: "https://skunblocked.com/", description: "A fun 3D multiplayer kart battle game where you drive, drift, and use various power-ups to eliminate other drivers." },
+                    { title: "Sandbox City 3D", url: "https://lo-th.github.io/3d.city/", description: "A lightweight 3D city simulator where you can explore and interact with a virtual environment." },
+                    { title: "Monkey Mart", url: "https://monkeymarttopvaz.github.io/", description: "Manage a growing supermarket run by monkeys, stocking shelves, and serving customers in this cute management game." },
+                    { title: "Impossible Quiz", url: "https://theimpossiblequiz-online.github.io/", description: "A hilarious and frustrating quiz game designed to trick you with unexpected questions and logic puzzles." },
+                    { title: "Retro Flight Simulator", url: "https://ruben3d.github.io/retroflightsim/dist/", description: "A simple, retro-styled flight simulator focused on the basic mechanics of flying an aircraft." },
+                    { title: "Moto Bike X3M", url: "https://thepizzaeditions.github.io/go/moto-x3m.html", description: "A popular, physics-based dirt bike racing game featuring extreme stunts and challenging obstacle courses." },
+                    { title: "Paper Io 2", url: "https://sites.google.com/view/drive-u-7-home/paper-io-2", description: "A competitive territory capture game where you must draw lines to claim areas while defending your own base." },
+                    { title: "Bad Time Simulator", url: "https://sans-simulator.github.io/c2-sans-fight/", description: "A fan-made battle simulator based on the challenging Sans fight from the game Undertale." },
+                    { title: "1v1.lol", url: "https://sites.google.com/view/drive-u-7-home/lol-v-11", description: "A fast-paced competitive online building and shooting game, popular for its quick matches and skill-based combat." },
+                    { title: "GitHub Flight Simulator", url: "https://kristoffer-dyrkorn.github.io/flightsimulator/", description: "A simple, open-source flight simulator built with web technologies, often used as a demonstration or educational tool." },
+                    { title: "Slow Roads", url: "https://the26pershing.github.io/slow-roads/", description: "An aesthetically pleasing endless driving game across minimalist landscapes, emphasizing a meditative and relaxing experience." },
+                    { title: "Driving Wild", url: "https://killedbyapixel.github.io/Drive13K/", description: "A minimalistic 3D driving game designed to fit within a small file size, focusing on simple, open-world exploration." },
+                    { title: "SimCar", url: "https://simcar.io/index_run_game.html", description: "A simple car simulation game that allows for basic driving and physics interaction in a virtual environment." },
+                    { title: "GunSpin", url: "https://gun-spin-online.github.io/", description: "A game where you use the recoil of a constantly firing gun to propel yourself further and achieve higher distances." },
+                    { title: "FortZone Battle Royale", url: "https://fortzone-battle-royale.com/", description: "A casual, unblocked version of the popular battle royale format, offering quick survival gameplay." },
+                ]
+            },
+            "Proxy Websites & Unblocked Portals": {
+                id: "proxy",
+                color: "text-indigo-300",
+                links: [
+                    { title: "Helios Browser Proxy", url: "https://helios-browser.vercel.app", description: "A modern web proxy intended for private browsing and accessing blocked content through a clean, reliable interface." },
+                    { title: "Starship App Proxy", url: "https://starship-app.com/", description: "A straightforward, modern proxy application designed to bypass network restrictions for seamless web access." },
+                    { title: "AaronOS Beta Proxy", url: "https://aaronos.dev/AaronOS/aosBeta.ph", description: "A proxy system integrated into a simulated operating system environment, often used to access content on restrictive networks." },
+                    { title: "Dingus Proxy", url: "https://dinguschan-owo.github.io/dingusproxy/", description: "A simple, open-source proxy hosted on GitHub Pages, providing a direct connection to various websites." },
+                    { title: "UBG99 Hub", url: "https://ubg99.lol/", description: "A popular hub that aggregates a large collection of unblocked games and useful tools." },
+                    { title: "Unblocked Games 77 (Site)", url: "https://sites.google.com/site/unblockedgames77/home", description: "A well-known portal for finding various games accessible on networks with strict content filtering." },
+                    { title: "Unblocked Games 67 (Site)", url: "https://sites.google.com/site/unblockedgame67/", description: "Another major directory offering a wide selection of games and entertainment options for restricted environments." },
+                    { title: "Classroom 6X (Site)", url: "https://sites.google.com/view/classroom6x/", description: "A portal disguised as an educational page to provide access to unblocked games and web content." },
+                    { title: "UBG Hub", url: "http://ubghub.org/", description: "A dedicated resource for navigating to various unblocked game sites and web utilities." },
+                    { title: "The Advanced Method (Flash)", url: "https://sites.google.com/view/theadvancedmethod/flash/falldown", description: "A specific entry point often used to access older, Flash-based games and applications." },
+                    { title: "Wolf Unblock (Site)", url: "https://sites.google.com/view/wolfunblock/home", description: "A straightforward unblocker site offering links to popular games and media platforms." },
+                    { title: "Polytrack Unblocked", url: "https://polytrackunblocked.org/all-games", description: "A dedicated site for the Poly Track game and other similar unblocked racing and arcade titles." },
+                ]
+            },
+            "Productivity, Tools & Utilities": {
+                id: "productivity",
+                color: "text-teal-300",
+                links: [
+                    // Duplicated links added back into productivity
+                    ...sharedEverydayLinks.filter(l => 
+                        l.title !== "GasBuddy - Fuel Prices" && 
+                        l.title !== "Side Hustle Stack"
+                    ),
+                    
+                    { title: "Vidu AI - Video Tool", url: "https://vidu.ai/", description: "An AI-powered platform designed to simplify video creation and editing processes using generative models." },
+                    { title: "Unsplash - Image Search", url: "https://unsplash.com/s/photos/test", description: "A large library of free, high-quality stock photography that can be used for any creative project without royalties." },
+                    { title: "Neal.fun - Creative Tools", url: "https://neal.fun/", description: "A collection of engaging and often thought-provoking interactive websites and creative tools for curious minds." },
+                    { title: "The Useful Sites Page", url: "https://www.cdcruz.com/p/useful_sites.html", description: "A curated list of various useful and unique web resources compiled by a third party." },
+                ]
+            },
+            "Media & Entertainment": {
+                id: "media",
+                color: "text-teal-300",
+                links: [
+                    { title: "Reelgood - Streaming Guide", url: "https://reelgood.com/", description: "A comprehensive streaming guide that tells you where to watch any movie or show across all your streaming services." },
+                    { title: "Radio Garden - Global Radio", url: "https://radio.garden/listen/kqrs-fm/bTYyl91D#google_vignette", description: "A unique interactive map that lets you tune into thousands of live radio stations from around the entire world." },
+                ]
+            },
+            "Finance & Commerce": {
+                id: "finance",
+                color: "text-teal-300",
+                links: [
+                    // Duplicated links added back into finance
+                    ...sharedEverydayLinks.filter(l => 
+                        l.title === "GasBuddy - Fuel Prices" || 
+                        l.title === "Side Hustle Stack"
+                    ),
+
+                    { title: "Mortgage Calculator - OVO Game", url: "https://www.mortgagecalculator.org/money-games/ovo/", description: "An educational money game hosted by a mortgage calculator site to teach basic financial literacy in a fun way." },
+                    { title: "Mortgage Calculator - Idle Factory", url: "https://www.mortgagecalculator.org/money-games/idle-factory-domination/", description: "An idle clicker game that demonstrates concepts of passive income and investment growth." },
+                    { title: "Giztop - Tech E-commerce", url: "https://giztop.com/", description: "An online retailer specializing in new and upcoming smartphones, gadgets, and consumer electronics, often featuring imported brands." },
+                ]
+            },
+            "Aviation: Flight Tracking & Planning": {
+                id: "aviation",
+                color: "text-sky-300",
+                links: [
+                    { title: "Flightradar24 - Global Tracking", url: "https://www.flightradar24.com/", description: "Track commercial air traffic worldwide in real-time on a map, viewing specific flight paths, aircraft details, and status." },
+                    { title: "FlightAware - Detailed Status", url: "https://www.flightaware.com/", description: "Provides detailed flight status, tracking maps, and historical data for commercial and general aviation flights." },
+                    { title: "ADS-B Exchange - Unfiltered Data", url: "https://globe.adsbexchange.com/", description: "The world's largest co-op of unfiltered flight data, often used by enthusiasts and journalists for tracking non-commercial aircraft." },
+                    { title: "PlaneFinder - Live Radar", url: "https://planefinder.net/", description: "Offers live flight tracking and a comprehensive database of aircraft and airport information." },
+                    { title: "AirNav Radar - Live Traffic", url: "https://www.airnavradar.com/", description: "A real-time display of air traffic, showing aircraft movement and basic flight information globally." },
+                    { title: "SkyVector - Pilot Charts & Maps", url: "https://skyvector.com/", description: "View official FAA aeronautical charts and run quick flight planning with weather overlays for pilots." },
+                    { title: "Aviation Weather Center (AWC)", url: "https://aviationweather.gov/", description: "Official source for US aviation meteorological forecasts, warnings, and current conditions critical for flight planning." },
+                    { title: "AirNav - Airport Information", url: "https://www.airnav.com/airports/", description: "A comprehensive resource providing detailed information on thousands of public and private airports in the US." },
+                    { title: "World Airport Codes", url: "https://www.world-airport-codes.com/", description: "The definitive reference site for looking up IATA and ICAO airport codes, as well as airport details globally." },
+                    { title: "AOPA Destinations - Airport Info", url: "https://www.aopa.org/destinations/", description: "Airport information and destination guides provided by the Aircraft Owners and Pilots Association." },
+                    { title: "ForeFlight (Web) - Planning Tool", url: "https://plan.foreflight.com/", description: "The web interface for the leading electronic flight bag app, used for detailed route and performance planning." },
+                    { title: "Live ATC - Air Traffic Control Audio", url: "https://www.liveatc.net/", description: "Listen to live air traffic control communication from airports worldwide, streamed in real-time." },
+                    { title: "iFlightPlanner - Charts", url: "https://www.iflightplanner.com/AviationCharts/", description: "Provides access to current VFR/IFR charts and airport diagrams for flight planning purposes." },
+                    { title: "FAA TFR Map", url: "https://tfr.faa.gov/tfr3/?page=tfr", description: "Official Federal Aviation Administration map displaying current Temporary Flight Restrictions (TFRs)." },
+                    { title: "VFR Planner", url: "https://vfrplanner.com/", description: "A specialized tool dedicated to helping pilots plan Visual Flight Rules (VFR) cross-country routes." },
+                    { title: "METAR-TAF.com - Weather", url: "https://metar-taf.com/", description: "Quickly access and decode METAR (routine weather report) and TAF (terminal aerodrome forecast) data." },
+                ]
+            },
+            "Aviation: Safety & Regulation": {
+                id: "aviation-safety",
+                color: "text-sky-300",
+                links: [
+                    { title: "FAA Registry - N-Number Lookup", url: "https://registry.faa.gov/aircraftinquiry/search/nnumberinquiry", description: "Search the official FAA database to find ownership and airworthiness status of U.S. registered aircraft." },
+                    { title: "AviationDB - Aircraft Query", url: "https://www.aviationdb.com/", description: "A comprehensive database for querying aircraft information, specifications, and history by registration or type." },
+                    { title: "Accident Reporter (ASN)", url: "https://asn.flightsafety.org/", description: "The Aviation Safety Network's extensive database of accidents, incidents, and hijacking occurrences worldwide." },
+                    { title: "FAA Regulations & Policies", url: "https://www.faa.gov/regulations_policies", description: "Access the official source for all Federal Aviation Regulations (FARs) and agency policies." },
+                    { title: "FAA Hazmat Regulations (Part 91)", url: "https://www.faa.gov/hazmat/air_carriers/operations/part_91", description: "Specific guidance on handling and transporting hazardous materials under Part 91 of the FARs." },
+                    { title: "FlightGlobal - News", url: "https://www.flightglobal.com/", description: "A leading global source for aerospace and aviation industry news, analysis, and data." },
+                    { title: "FAA DRS - Document Repository", url: "https://drs.faa.gov/browse", description: "The FAA's official Document Repository System for accessing internal handbooks, orders, and public documents." },
+                    { title: "NTSB Aviation Accidents", url: "https://www.ntsb.gov/investigations/Pages/Aviation.aspx", description: "The National Transportation Safety Board's official page for aviation accident investigations and reports." },
+                    { title: "Controller.com - Sales Listings", url: "https://www.controller.com/", description: "A major marketplace for buying and selling new and used aircraft, providing sales listings and pricing data." },
+                    { title: "Aero-Search - Database Search", url: "https://www.aero-search.com/", description: "A tool for performing detailed, aggregated searches across various aviation-related databases." },
+                    { title: "FAA Notams Search", url: "https://notams.aim.faa.gov/notamSearch/nsapp.html#/", description: "Official FAA tool for searching and briefing Notices to Air Missions (NOTAMS)." },
+                ]
+            },
+            "Aviation: Educational & Reference": {
+                id: "aviation-edu",
+                color: "text-sky-300",
+                links: [
+                    { title: "Wiki FlightGear - Main Page", url: "https://wiki.flightgear.org/Main_Page", description: "The primary wiki resource for the free, open-source FlightGear flight simulator community and documentation." },
+                    { title: "Wikipedia: WikiProject Aviation", url: "https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Aviation", description: "A collaborative effort on Wikipedia to improve and organize aviation-related articles and content." },
+                    { title: "Aircraft Fandom Wiki", url: "https://aircraft.fandom.com/wiki/Main_Page", description: "A fan-maintained wiki dedicated to providing detailed information on various aircraft types and models." },
+                ]
+            },
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        // Function to create a link card HTML structure
+        const createLinkCard = (title, url, description) => `
+            <a href="${url}" target="_blank" rel="noopener noreferrer" 
+               class="link-card p-4 rounded-xl shadow-lg border border-gray-700 hover:border-sky-500/50"
+               data-search-terms="${(title + ' ' + url + ' ' + description).toLowerCase()}">
+                <!-- Icon Placeholder: Using a simple globe icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                    <path d="M2 12h20"></path>
+                </svg>
+                <div class="flex-grow">
+                    <div class="font-semibold text-lg text-white">${title}</div>
+                    <p class="text-sm text-gray-400 mt-1 mb-2 leading-snug">${description}</p>
+                    <div class="text-xs text-sky-400/70 truncate opacity-70">${url.replace(/https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</div>
+                </div>
+            </a>
+        `;
+
+        // Function to render all categories and links
+        const renderLinks = () => {
+            const essentialContainer = document.getElementById('content-grid');
+            let essentialHtmlContent = '';
+
+            const everydayContainer = document.getElementById('everyday-content-grid');
+            let everydayHtmlContent = '';
+            
+            // Separate rendering logic for 'essential-sites' view vs 'everyday-sites' view 
+            for (const category in categorizedLinks) {
+                const data = categorizedLinks[category];
+                const links = data.links;
+                
+                // Start of Category Section
+                let categoryHtml = `
+                    <section id="${data.id}" class="category-section bg-gray-900/40 p-5 sm:p-8 rounded-2xl shadow-inner-xl border border-gray-800">
+                        <!-- Category Title with color coding -->
+                        <h2 class="category-title text-3xl font-bold mb-8 pt-2 pb-3 ${data.color} border-b border-gray-700/50">
+                            ${category}
+                        </h2>
+                        
+                        <!-- Grid for Links -->
+                        <div class="link-grid grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                `; 
+
+                // Add Link Cards
+                links.forEach(link => {
+                    categoryHtml += createLinkCard(link.title, link.url, link.description);
+                });
+
+                // End of Category Section
+                categoryHtml += `
+                        </div>
+                    </section>
+                `;
+
+                // Determine where to place the category content based on its purpose
+                if (category === "Everyday Sites") {
+                    // Everyday Sites are rendered directly inside their dedicated view section
+                    everydayHtmlContent += categoryHtml;
+                } else {
+                    // All other categories go into the Essential Sites view
+                    essentialHtmlContent += categoryHtml;
+                }
+            }
+
+            // Inject the content into the respective container IDs
+            essentialContainer.innerHTML = essentialHtmlContent;
+            everydayContainer.innerHTML = everydayHtmlContent;
+
+        };
+
+        // Function to filter links based on search input (only relevant for Essential Sites view)
+        let searchTimeout;
+        window.filterLinks = () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                // Ensure search only runs if we are in the 'essential-sites' view
+                if (document.getElementById('essential-sites').classList.contains('hidden')) return;
+
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+                const linkCards = document.querySelectorAll('#content-grid .link-card'); // Only search in the essential grid
+                const sections = document.querySelectorAll('#content-grid .category-section');
+
+                linkCards.forEach(card => {
+                    const searchTerms = card.getAttribute('data-search-terms'); 
+                    const matches = !searchTerm || searchTerms.includes(searchTerm);
+                    
+                    // Toggle card visibility using the 'hidden' class for transition
+                    card.classList.toggle('hidden', !matches);
+                });
+
+                // Hide categories that have no visible links
+                sections.forEach(section => {
+                    const visibleLinks = section.querySelector('.link-grid').querySelectorAll('.link-card:not(.hidden)').length;
+                    section.style.display = visibleLinks > 0 ? 'block' : 'none';
+                });
+            }, 250); // Debounce search input by 250ms
+        };
+
+        // --- NAVIGATION FUNCTIONS ---
+
+        /**
+         * Toggles the visibility of the sidebar menu.
+         * @param {boolean} [shouldOpen] - Forces the menu open (true) or closed (false).
+         */
+        window.toggleMenu = (shouldOpen) => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            // Check for the class that hides it on the right
+            const isHidden = sidebar.classList.contains('translate-x-full');
+            const action = shouldOpen === undefined ? isHidden : shouldOpen;
+
+            if (action) {
+                // Open Menu: Remove the hidden class
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling background
+            } else {
+                // Close Menu: Add the hidden class
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }
+        };
+
+        /**
+         * Switches the main content view based on the selected link.
+         * @param {string} viewId - The ID of the view section to display.
+         */
+        window.switchView = (viewId) => {
+            const allViews = document.querySelectorAll('.view-section');
+            const searchSection = document.getElementById('search-section');
+
+            allViews.forEach(view => {
+                view.classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+
+            // Show/hide search bar based on view
+            // The search bar is only relevant for the original, large link directory (essential-sites)
+            if (viewId === 'essential-sites') {
+                searchSection.classList.remove('hidden');
+            } else {
+                searchSection.classList.add('hidden');
+            }
+
+            // Update active state of nav links 
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.classList.remove('bg-sky-700', 'ring-sky-500');
+                link.classList.add('bg-gray-900', 'hover:bg-gray-800');
+
+                if (link.getAttribute('data-view') === viewId) {
+                    link.classList.add('bg-sky-700', 'ring-sky-500');
+                    link.classList.remove('bg-gray-900', 'hover:bg-gray-800');
+                }
+            });
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLinks();
+            // The sidebar is initially translated 100% to the right
+            document.getElementById('sidebar').classList.add('translate-x-full'); 
+            
+            // Initialize with the 'Essential Sites' view open and active
+            switchView('essential-sites'); 
+        });
+    </script>
+
+</body>
+</html>
